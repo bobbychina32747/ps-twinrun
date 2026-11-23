@@ -2,7 +2,8 @@
 param(
     [string]$Script,
     [string]$OutputDirectory = (Join-Path ([IO.Path]::GetTempPath()) 'ps-twinrun'),
-    [switch]$NoOpen
+    [switch]$NoOpen,
+    [switch]$FailOnDifference
 )
 
 Set-StrictMode -Version 2
@@ -144,6 +145,9 @@ try {
     [IO.File]::WriteAllText($htmlPath, (New-ComparisonHtml $report), $utf8)
     Write-Host "Report: $htmlPath"
     Open-Report $htmlPath
+    if ($FailOnDifference -and ($report.Cases | Where-Object { $_.Changes.Count -gt 0 })) {
+        exit 3
+    }
     exit 0
 } catch {
     [Console]::Error.WriteLine('PS TwinRun: ' + $_.Exception.Message)

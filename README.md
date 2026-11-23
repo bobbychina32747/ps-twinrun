@@ -38,10 +38,17 @@ The terminal prints the HTML path. Beside it you'll find `report.json` and the f
 
 TwinRun compares the exit code, decoded stdout and stderr, and regular files in the working directory by relative path, length and SHA-256. The report shows up to 32 leading bytes per file. Keep console output small; it is captured in memory. Links and junctions in the output tree produce an error. The comparison covers observable results for the input you ran.
 
+To fail a CI job when the shells behave differently, run the launcher with `-FailOnDifference`. It writes both reports before returning 3 if any case differs.
+
+```powershell
+.\compare.cmd -Script ".\my script.ps1" -NoOpen -FailOnDifference
+```
+
 | Launcher exit | Meaning |
 | --- | --- |
-| 0 | The comparison finished. Sample differences and child exit codes appear in the report. |
+| 0 | The comparison finished. With `-FailOnDifference`, all cases matched. Without it, differences are reported and the launcher still returns 0. |
 | 1 | The comparison could not finish. See the terminal error. |
 | 2 | A required runtime was missing or unavailable. A built-in demo can still open its recorded preview. |
+| 3 | `-FailOnDifference` was set and at least one case differed. See `report.html` or `report.json` for the changed fields. |
 
 Found a migration surprise? A small script that reproduces it in both shells makes a good [example request](https://github.com/bobbychina32747/ps-twinrun/issues).
